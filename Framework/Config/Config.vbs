@@ -5,7 +5,8 @@
 '==============================================================================
 
 Const APP_URL           = "https://your-org--qa.sandbox.lightning.force.com"  ' TODO: set to your actual sandbox/org URL (redirects to .my.salesforce.com login)
-Const APP_BROWSER       = "chrome"                           ' chrome | iexplore | firefox
+Const APP_BROWSER       = "msedge"                           ' msedge | chrome | iexplore | firefox
+Const APP_BROWSER_ARGS  = "-inprivate"                       ' Edge/Chromium private window switch
 Const DEFAULT_SYNC_MS   = 30000                              ' default object sync timeout (ms)
 Const DEFAULT_PAGE_LOAD_MS = 60000
 

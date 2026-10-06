@@ -1,37 +1,38 @@
 ' --- Config ------------------------------------------------------------------
-Const SFQA_APP_URL               = "https://your-org--qa.sandbox.lightning.force.com/"  ' TODO: set to your actual sandbox/org URL
-Const SFQA_APP_BROWSER           = "chrome"
-Const SFQA_SYNC_TIMEOUT_MS       = 30000
-Const SFQA_PAGE_LOAD_TIMEOUT_MS  = 60000
-Const SFQA_BROWSER_TITLE_PATTERN = ".*Salesforce.*|.*Lightning.*"
-Const SFQA_PAGE_TITLE_PATTERN    = ".*Salesforce.*|.*Lightning.*"
+Const APP_URL               = "https://your-org--qa.sandbox.lightning.force.com/"  ' TODO: set to your actual sandbox/org URL
+Const APP_BROWSER           = "msedge"
+Const APP_BROWSER_ARGS      = "-inprivate"
+Const DEFAULT_SYNC_MS       = 30000
+Const DEFAULT_PAGE_LOAD_MS  = 60000
+Const BROWSER_TITLE_PATTERN = ".*Salesforce.*|.*Lightning.*"
+Const PAGE_TITLE_PATTERN    = ".*Salesforce.*|.*Lightning.*"
 
 ' --- Utilities -----------------------------------------------------------------
 
-Function SFQA_GetAppBrowser()
+Function GetAppBrowser()
     Dim oDesc
     Set oDesc = Description.Create()
-    oDesc("title").Value = SFQA_BROWSER_TITLE_PATTERN
+    oDesc("title").Value = BROWSER_TITLE_PATTERN
     oDesc("title").RegularExpression = True
-    Set SFQA_GetAppBrowser = Browser(oDesc)
+    Set GetAppBrowser = Browser(oDesc)
 End Function
 
-Function SFQA_GetAppPage()
+Function GetAppPage()
     Dim oDesc
     Set oDesc = Description.Create()
-    oDesc("title").Value = SFQA_PAGE_TITLE_PATTERN
+    oDesc("title").Value = PAGE_TITLE_PATTERN
     oDesc("title").RegularExpression = True
-    Set SFQA_GetAppPage = SFQA_GetAppBrowser().Page(oDesc)
+    Set GetAppPage = GetAppBrowser().Page(oDesc)
 End Function
 
-Function SFQA_WaitForObject(oTestObject, nTimeoutMs)
+Function WaitForObject(oTestObject, nTimeoutMs)
     Dim nTimeoutSec
-    If nTimeoutMs = 0 Then nTimeoutMs = SFQA_SYNC_TIMEOUT_MS
+    If nTimeoutMs = 0 Then nTimeoutMs = DEFAULT_SYNC_MS
     nTimeoutSec = nTimeoutMs / 1000
-    SFQA_WaitForObject = oTestObject.Exist(nTimeoutSec)
+    WaitForObject = oTestObject.Exist(nTimeoutSec)
 End Function
 
-Sub SFQA_ReportStep(sStepName, bPassed, sDetails)
+Sub ReportStep(sStepName, bPassed, sDetails)
     Dim nStatus
     If bPassed Then
         nStatus = micPass
@@ -41,7 +42,7 @@ Sub SFQA_ReportStep(sStepName, bPassed, sDetails)
     Reporter.ReportEvent nStatus, sStepName, sDetails
 End Sub
 
-Sub SFQA_ReportFatal(sStepName, sDetails)
+Sub ReportFatal(sStepName, sDetails)
     Reporter.ReportEvent micFail, sStepName, sDetails
     ExitAction
 End Sub
@@ -67,60 +68,60 @@ Class PO_Login
 
     Public Function EnterUsername(ByVal sUsername)
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebEdit(sLocUsername), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebEdit(sLocUsername), DEFAULT_SYNC_MS) Then
             oPage.WebEdit(sLocUsername).Set sUsername
             EnterUsername = True
         Else
-            SFQA_ReportStep "PO_Login.EnterUsername", False, "Username field not found within timeout"
+            ReportStep "PO_Login.EnterUsername", False, "Username field not found within timeout"
             EnterUsername = False
         End If
     End Function
 
     Public Function EnterPassword(ByVal sPassword)
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebEdit(sLocPassword), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebEdit(sLocPassword), DEFAULT_SYNC_MS) Then
             oPage.WebEdit(sLocPassword).SetSecure sPassword
             EnterPassword = True
         Else
-            SFQA_ReportStep "PO_Login.EnterPassword", False, "Password field not found within timeout (step 1 may have failed)"
+            ReportStep "PO_Login.EnterPassword", False, "Password field not found within timeout (step 1 may have failed)"
             EnterPassword = False
         End If
     End Function
 
     Public Function ClickLogin()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocBtnLogin), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocBtnLogin), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocBtnLogin).Click
             ClickLogin = True
         Else
-            SFQA_ReportStep "PO_Login.ClickLogin", False, "Login button not found within timeout"
+            ReportStep "PO_Login.ClickLogin", False, "Login button not found within timeout"
             ClickLogin = False
         End If
     End Function
 
     Public Function EnterVerificationCode(ByVal sCode)
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebEdit(sLocVerificationCode), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebEdit(sLocVerificationCode), DEFAULT_SYNC_MS) Then
             oPage.WebEdit(sLocVerificationCode).Set sCode
             EnterVerificationCode = True
         Else
-            SFQA_ReportStep "PO_Login.EnterVerificationCode", False, "Verification Code field not found within timeout"
+            ReportStep "PO_Login.EnterVerificationCode", False, "Verification Code field not found within timeout"
             EnterVerificationCode = False
         End If
     End Function
 
     Public Function ClickVerify()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocBtnVerify), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocBtnVerify), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocBtnVerify).Click
             ClickVerify = True
         Else
-            SFQA_ReportStep "PO_Login.ClickVerify", False, "Verify button not found within timeout"
+            ReportStep "PO_Login.ClickVerify", False, "Verify button not found within timeout"
             ClickVerify = False
         End If
     End Function
@@ -132,14 +133,14 @@ Class PO_Login
 
         bStep1 = EnterUsername(sUsername) And ClickLogin()
         If Not bStep1 Then
-            SFQA_ReportStep "PO_Login.Login", False, "Step 1 (username submit) failed"
+            ReportStep "PO_Login.Login", False, "Step 1 (username submit) failed"
             Login = False
             Exit Function
         End If
 
         bStep2 = EnterPassword(sPassword) And ClickLogin()
         If Not bStep2 Then
-            SFQA_ReportStep "PO_Login.Login", False, "Step 2 (password submit) failed"
+            ReportStep "PO_Login.Login", False, "Step 2 (password submit) failed"
             Login = False
             Exit Function
         End If
@@ -149,8 +150,8 @@ Class PO_Login
 
     Public Function IsLoginPageDisplayed()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        IsLoginPageDisplayed = SFQA_WaitForObject(oPage.WebEdit(sLocUsername), SFQA_SYNC_TIMEOUT_MS)
+        Set oPage = GetAppPage()
+        IsLoginPageDisplayed = WaitForObject(oPage.WebEdit(sLocUsername), DEFAULT_SYNC_MS)
     End Function
 
 End Class
@@ -172,12 +173,12 @@ Class PO_AppNavigator
 
     Public Function OpenAppLauncher()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocAppLauncherBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocAppLauncherBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocAppLauncherBtn).Click
             OpenAppLauncher = True
         Else
-            SFQA_ReportStep "PO_AppNavigator.OpenAppLauncher", False, "App Launcher button not found within timeout"
+            ReportStep "PO_AppNavigator.OpenAppLauncher", False, "App Launcher button not found within timeout"
             OpenAppLauncher = False
         End If
     End Function
@@ -186,18 +187,18 @@ Class PO_AppNavigator
     ' matching app tile from the filtered results.
     Public Function OpenApp(ByVal sAppName)
         Dim oPage, sLocAppOption
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
 
-        If Not SFQA_WaitForObject(oPage.WebEdit(sLocSearchAppsBox), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_AppNavigator.OpenApp", False, "Search apps and items box not found within timeout"
+        If Not WaitForObject(oPage.WebEdit(sLocSearchAppsBox), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_AppNavigator.OpenApp", False, "Search apps and items box not found within timeout"
             OpenApp = False
             Exit Function
         End If
         oPage.WebEdit(sLocSearchAppsBox).Set sAppName
 
         sLocAppOption = "xpath:=//*[@role='option'][contains(.,'" & sAppName & "')]"
-        If Not SFQA_WaitForObject(oPage.WebElement(sLocAppOption), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_AppNavigator.OpenApp", False, "App option '" & sAppName & "' not found within timeout"
+        If Not WaitForObject(oPage.WebElement(sLocAppOption), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_AppNavigator.OpenApp", False, "App option '" & sAppName & "' not found within timeout"
             OpenApp = False
             Exit Function
         End If
@@ -207,12 +208,12 @@ Class PO_AppNavigator
 
     Public Function ShowNavigationMenu()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocShowNavMenuBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocShowNavMenuBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocShowNavMenuBtn).Click
             ShowNavigationMenu = True
         Else
-            SFQA_ReportStep "PO_AppNavigator.ShowNavigationMenu", False, "Show Navigation Menu button not found within timeout"
+            ReportStep "PO_AppNavigator.ShowNavigationMenu", False, "Show Navigation Menu button not found within timeout"
             ShowNavigationMenu = False
         End If
     End Function
@@ -220,13 +221,13 @@ Class PO_AppNavigator
     ' Clicks a menu item (e.g. "Opportunities") from the open Navigation Menu.
     Public Function ClickNavMenuItem(ByVal sItemName)
         Dim oPage, sLocMenuItem
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
         sLocMenuItem = "xpath:=//*[@role='menuitem'][contains(.,'" & sItemName & "')]"
-        If SFQA_WaitForObject(oPage.WebElement(sLocMenuItem), SFQA_SYNC_TIMEOUT_MS) Then
+        If WaitForObject(oPage.WebElement(sLocMenuItem), DEFAULT_SYNC_MS) Then
             oPage.WebElement(sLocMenuItem).Click
             ClickNavMenuItem = True
         Else
-            SFQA_ReportStep "PO_AppNavigator.ClickNavMenuItem", False, "Menu item '" & sItemName & "' not found within timeout"
+            ReportStep "PO_AppNavigator.ClickNavMenuItem", False, "Menu item '" & sItemName & "' not found within timeout"
             ClickNavMenuItem = False
         End If
     End Function
@@ -234,9 +235,9 @@ Class PO_AppNavigator
     ' Verifies the app shell heading (top-left, e.g. "Sales Centre") is displayed.
     Public Function IsAppDisplayed(ByVal sAppName)
         Dim oPage, sLocHeading
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
         sLocHeading = "xpath:=//h1[text()='" & sAppName & "']"
-        IsAppDisplayed = SFQA_WaitForObject(oPage.WebElement(sLocHeading), SFQA_PAGE_LOAD_TIMEOUT_MS)
+        IsAppDisplayed = WaitForObject(oPage.WebElement(sLocHeading), DEFAULT_PAGE_LOAD_MS)
     End Function
 
 End Class
@@ -251,41 +252,47 @@ Class PO_OpportunityList
     Private sLocSearchThisListBox
 
     Private Sub Class_Initialize()
-        sLocSelectListViewBtn = "xpath:=//button[@title='Select a List View: Opportunities']"
+        ' NOTE: clicking the inner <button title="Select a List View: ..."> only
+        ' highlights/focuses it - the dropdown's open handler lives on the
+        ' enclosing <lightning-button-icon class="pickerChevron"> custom
+        ' element, so that is the actual click target (confirmed 2026-10-06
+        ' from the live DOM: <lightning-button-icon class="pickerChevron">
+        ' wrapping the button).
+        sLocSelectListViewBtn = "xpath:=//lightning-button-icon[@class='pickerChevron']"
         sLocSearchListsBox    = "xpath:=//input[@placeholder='Search lists...']"
         sLocSearchThisListBox = "xpath:=//input[@placeholder='Search this list...']"
     End Sub
 
     Public Function IsOpportunitiesPageDisplayed()
         Dim oPage, sLocHeading
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
         sLocHeading = "xpath:=//h1[text()='Opportunities']"
-        IsOpportunitiesPageDisplayed = SFQA_WaitForObject(oPage.WebElement(sLocHeading), SFQA_PAGE_LOAD_TIMEOUT_MS)
+        IsOpportunitiesPageDisplayed = WaitForObject(oPage.WebElement(sLocHeading), DEFAULT_PAGE_LOAD_MS)
     End Function
 
     ' Opens the list-view picker, types the view name, and selects the
     ' matching view from the filtered "Recent List Views" results.
     Public Function SelectListView(ByVal sListViewName)
         Dim oPage, sLocViewOption
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
 
-        If Not SFQA_WaitForObject(oPage.WebButton(sLocSelectListViewBtn), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityList.SelectListView", False, "List View picker button not found within timeout"
+        If Not WaitForObject(oPage.WebElement(sLocSelectListViewBtn), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityList.SelectListView", False, "List View picker button not found within timeout"
             SelectListView = False
             Exit Function
         End If
-        oPage.WebButton(sLocSelectListViewBtn).Click
+        oPage.WebElement(sLocSelectListViewBtn).Click
 
-        If Not SFQA_WaitForObject(oPage.WebEdit(sLocSearchListsBox), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityList.SelectListView", False, "Search lists box not found within timeout"
+        If Not WaitForObject(oPage.WebEdit(sLocSearchListsBox), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityList.SelectListView", False, "Search lists box not found within timeout"
             SelectListView = False
             Exit Function
         End If
         oPage.WebEdit(sLocSearchListsBox).Set sListViewName
 
         sLocViewOption = "xpath:=//*[@role='option'][contains(.,'" & sListViewName & "')]"
-        If Not SFQA_WaitForObject(oPage.WebElement(sLocViewOption), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityList.SelectListView", False, "List view option '" & sListViewName & "' not found within timeout"
+        If Not WaitForObject(oPage.WebElement(sLocViewOption), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityList.SelectListView", False, "List view option '" & sListViewName & "' not found within timeout"
             SelectListView = False
             Exit Function
         End If
@@ -296,9 +303,9 @@ Class PO_OpportunityList
     ' Types into "Search this list..." and presses Enter to filter rows.
     Public Function SearchList(ByVal sSearchText)
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If Not SFQA_WaitForObject(oPage.WebEdit(sLocSearchThisListBox), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityList.SearchList", False, "Search this list box not found within timeout"
+        Set oPage = GetAppPage()
+        If Not WaitForObject(oPage.WebEdit(sLocSearchThisListBox), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityList.SearchList", False, "Search this list box not found within timeout"
             SearchList = False
             Exit Function
         End If
@@ -311,13 +318,13 @@ Class PO_OpportunityList
     ' href pattern "/lightning/r/006..." - 006 is the Opportunity id prefix).
     Public Function OpenFirstRecord()
         Dim oPage, sLocFirstRecord
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
         sLocFirstRecord = "xpath:=(//a[contains(@href,'/lightning/r/006')])[1]"
-        If SFQA_WaitForObject(oPage.Link(sLocFirstRecord), SFQA_SYNC_TIMEOUT_MS) Then
+        If WaitForObject(oPage.Link(sLocFirstRecord), DEFAULT_SYNC_MS) Then
             oPage.Link(sLocFirstRecord).Click
             OpenFirstRecord = True
         Else
-            SFQA_ReportStep "PO_OpportunityList.OpenFirstRecord", False, "First Opportunity record link not found within timeout"
+            ReportStep "PO_OpportunityList.OpenFirstRecord", False, "First Opportunity record link not found within timeout"
             OpenFirstRecord = False
         End If
     End Function
@@ -353,12 +360,12 @@ Class PO_OpportunityDetail
 
     Public Function ClickMarkStageAsComplete()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocMarkStageCompleteBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocMarkStageCompleteBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocMarkStageCompleteBtn).Click
             ClickMarkStageAsComplete = True
         Else
-            SFQA_ReportStep "PO_OpportunityDetail.ClickMarkStageAsComplete", False, "Mark Stage as Complete button not found within timeout"
+            ReportStep "PO_OpportunityDetail.ClickMarkStageAsComplete", False, "Mark Stage as Complete button not found within timeout"
             ClickMarkStageAsComplete = False
         End If
     End Function
@@ -367,18 +374,18 @@ Class PO_OpportunityDetail
     ' given option (e.g. "Closed Won").
     Public Function ChangeStage(ByVal sStageName)
         Dim oPage, sLocStageOption
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
 
-        If Not SFQA_WaitForObject(oPage.WebElement(sLocStageDropdown), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityDetail.ChangeStage", False, "Stage dropdown not found within timeout"
+        If Not WaitForObject(oPage.WebElement(sLocStageDropdown), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityDetail.ChangeStage", False, "Stage dropdown not found within timeout"
             ChangeStage = False
             Exit Function
         End If
         oPage.WebElement(sLocStageDropdown).Click
 
         sLocStageOption = "xpath:=//*[@role='option'][contains(.,'" & sStageName & "')]"
-        If Not SFQA_WaitForObject(oPage.WebElement(sLocStageOption), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityDetail.ChangeStage", False, "Stage option '" & sStageName & "' not found within timeout"
+        If Not WaitForObject(oPage.WebElement(sLocStageOption), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityDetail.ChangeStage", False, "Stage option '" & sStageName & "' not found within timeout"
             ChangeStage = False
             Exit Function
         End If
@@ -388,30 +395,30 @@ Class PO_OpportunityDetail
 
     Public Function ClickDone()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocDoneBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocDoneBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocDoneBtn).Click
             ClickDone = True
         Else
-            SFQA_ReportStep "PO_OpportunityDetail.ClickDone", False, "Done button not found within timeout"
+            ReportStep "PO_OpportunityDetail.ClickDone", False, "Done button not found within timeout"
             ClickDone = False
         End If
     End Function
 
     Public Function IsStageChangedMessageDisplayed()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        IsStageChangedMessageDisplayed = SFQA_WaitForObject(oPage.WebElement(sLocStageChangedToast), SFQA_SYNC_TIMEOUT_MS)
+        Set oPage = GetAppPage()
+        IsStageChangedMessageDisplayed = WaitForObject(oPage.WebElement(sLocStageChangedToast), DEFAULT_SYNC_MS)
     End Function
 
     Public Function ClickEditMoveInDate()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocEditMoveInDateBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocEditMoveInDateBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocEditMoveInDateBtn).Click
             ClickEditMoveInDate = True
         Else
-            SFQA_ReportStep "PO_OpportunityDetail.ClickEditMoveInDate", False, "Edit Expected Move-in Date button not found within timeout"
+            ReportStep "PO_OpportunityDetail.ClickEditMoveInDate", False, "Edit Expected Move-in Date button not found within timeout"
             ClickEditMoveInDate = False
         End If
     End Function
@@ -420,17 +427,17 @@ Class PO_OpportunityDetail
     ' and selects "Today".
     Public Function SetMoveInDateToToday()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
+        Set oPage = GetAppPage()
 
-        If Not SFQA_WaitForObject(oPage.WebEdit(sLocMoveInDateTextbox), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityDetail.SetMoveInDateToToday", False, "Expected Move-in Date textbox not found within timeout"
+        If Not WaitForObject(oPage.WebEdit(sLocMoveInDateTextbox), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityDetail.SetMoveInDateToToday", False, "Expected Move-in Date textbox not found within timeout"
             SetMoveInDateToToday = False
             Exit Function
         End If
         oPage.WebEdit(sLocMoveInDateTextbox).Click
 
-        If Not SFQA_WaitForObject(oPage.WebButton(sLocDatePickerTodayBtn), SFQA_SYNC_TIMEOUT_MS) Then
-            SFQA_ReportStep "PO_OpportunityDetail.SetMoveInDateToToday", False, "Date picker 'Today' button not found within timeout"
+        If Not WaitForObject(oPage.WebButton(sLocDatePickerTodayBtn), DEFAULT_SYNC_MS) Then
+            ReportStep "PO_OpportunityDetail.SetMoveInDateToToday", False, "Date picker 'Today' button not found within timeout"
             SetMoveInDateToToday = False
             Exit Function
         End If
@@ -440,20 +447,20 @@ Class PO_OpportunityDetail
 
     Public Function ClickSave()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        If SFQA_WaitForObject(oPage.WebButton(sLocSaveBtn), SFQA_SYNC_TIMEOUT_MS) Then
+        Set oPage = GetAppPage()
+        If WaitForObject(oPage.WebButton(sLocSaveBtn), DEFAULT_SYNC_MS) Then
             oPage.WebButton(sLocSaveBtn).Click
             ClickSave = True
         Else
-            SFQA_ReportStep "PO_OpportunityDetail.ClickSave", False, "Save button not found within timeout"
+            ReportStep "PO_OpportunityDetail.ClickSave", False, "Save button not found within timeout"
             ClickSave = False
         End If
     End Function
 
     Public Function IsClosedWonCardDisplayed()
         Dim oPage
-        Set oPage = SFQA_GetAppPage()
-        IsClosedWonCardDisplayed = SFQA_WaitForObject(oPage.WebElement(sLocClosedWonCard), SFQA_SYNC_TIMEOUT_MS)
+        Set oPage = GetAppPage()
+        IsClosedWonCardDisplayed = WaitForObject(oPage.WebElement(sLocClosedWonCard), DEFAULT_SYNC_MS)
     End Function
 
 End Class
@@ -475,88 +482,88 @@ sVerificationCode = "<VERIFICATION_CODE>"
 On Error Resume Next
 
 ' --- Step 1: Launch ----------------------------------------------------------
-SystemUtil.Run SFQA_APP_BROWSER & ".exe", SFQA_APP_URL
+SystemUtil.Run APP_BROWSER & ".exe", APP_BROWSER_ARGS & " " & APP_URL
 If Err.Number <> 0 Then
-    SFQA_ReportFatal "Launch Browser", "Failed to launch " & SFQA_APP_BROWSER & ": " & Err.Description
+    ReportFatal "Launch Browser", "Failed to launch " & APP_BROWSER & ": " & Err.Description
 End If
 
-If Not SFQA_WaitForObject(SFQA_GetAppPage(), SFQA_PAGE_LOAD_TIMEOUT_MS) Then
-    SFQA_ReportFatal "Launch Browser", "Login page did not load within " & SFQA_PAGE_LOAD_TIMEOUT_MS & "ms"
+If Not WaitForObject(GetAppPage(), DEFAULT_PAGE_LOAD_MS) Then
+    ReportFatal "Launch Browser", "Login page did not load within " & DEFAULT_PAGE_LOAD_MS & "ms"
 End If
 
 ' --- Step 2: Login (username + password + verification code) -------------
 Set oLogin = New PO_Login
 
 If Not oLogin.IsLoginPageDisplayed() Then
-    SFQA_ReportFatal "Verify Login Page", "Login page not displayed"
+    ReportFatal "Verify Login Page", "Login page not displayed"
 End If
-SFQA_ReportStep "Verify Login Page", True, "Login page displayed as expected"
+ReportStep "Verify Login Page", True, "Login page displayed as expected"
 
 bResult = oLogin.Login(sUsername, sPassword, sVerificationCode)
-SFQA_ReportStep "Perform Login", bResult, "Login(username, password, verificationCode) invoked"
+ReportStep "Perform Login", bResult, "Login(username, password, verificationCode) invoked"
 
 ' --- Step 3: Open App Launcher, select Sales Centre app --------------------
 Set oNav = New PO_AppNavigator
 
 bResult = oNav.OpenAppLauncher()
-SFQA_ReportStep "Open App Launcher", bResult, "App Launcher button clicked"
+ReportStep "Open App Launcher", bResult, "App Launcher button clicked"
 
 bResult = oNav.OpenApp("Sales Centre")
-SFQA_ReportStep "Open Sales Centre App", bResult, "Searched and selected Sales Centre from App Launcher"
+ReportStep "Open Sales Centre App", bResult, "Searched and selected Sales Centre from App Launcher"
 
 bResult = oNav.IsAppDisplayed("Sales Centre")
-SFQA_ReportStep "Verify Sales Centre App Displayed", bResult, "Sales Centre app heading displayed"
+ReportStep "Verify Sales Centre App Displayed", bResult, "Sales Centre app heading displayed"
 
 ' --- Step 4: Navigate to Opportunities via Navigation Menu ------------------
 bResult = oNav.ShowNavigationMenu()
-SFQA_ReportStep "Show Navigation Menu", bResult, "Navigation Menu opened"
+ReportStep "Show Navigation Menu", bResult, "Navigation Menu opened"
 
 bResult = oNav.ClickNavMenuItem("Opportunities")
-SFQA_ReportStep "Click Opportunities Menu Item", bResult, "Opportunities selected from Navigation Menu"
+ReportStep "Click Opportunities Menu Item", bResult, "Opportunities selected from Navigation Menu"
 
 Set oOppList = New PO_OpportunityList
 
 bResult = oOppList.IsOpportunitiesPageDisplayed()
-SFQA_ReportStep "Verify Opportunities Page Displayed", bResult, "Opportunities page heading displayed"
+ReportStep "Verify Opportunities Page Displayed", bResult, "Opportunities page heading displayed"
 
 ' --- Step 5: Select list view, search, open first record -------------------
 bResult = oOppList.SelectListView("All Open Opportunities Care Enquiries")
-SFQA_ReportStep "Select List View", bResult, "Selected 'All Open Opportunities Care Enquiries' list view"
+ReportStep "Select List View", bResult, "Selected 'All Open Opportunities Care Enquiries' list view"
 
 bResult = oOppList.SearchList("Assessment")
-SFQA_ReportStep "Search Opportunities List", bResult, "Searched list for 'Assessment'"
+ReportStep "Search Opportunities List", bResult, "Searched list for 'Assessment'"
 
 bResult = oOppList.OpenFirstRecord()
-SFQA_ReportStep "Open First Opportunity Record", bResult, "Opened first Opportunity record in filtered list"
+ReportStep "Open First Opportunity Record", bResult, "Opened first Opportunity record in filtered list"
 
 ' --- Step 6: Mark Stage as Complete -> Closed Won ---------------------------
 Set oOppDetail = New PO_OpportunityDetail
 
 bResult = oOppDetail.ClickMarkStageAsComplete()
-SFQA_ReportStep "Click Mark Stage as Complete", bResult, "Mark Stage as Complete button clicked"
+ReportStep "Click Mark Stage as Complete", bResult, "Mark Stage as Complete button clicked"
 
 bResult = oOppDetail.ChangeStage("Closed Won")
-SFQA_ReportStep "Select Closed Won Stage", bResult, "Closed Won selected from Stage dropdown"
+ReportStep "Select Closed Won Stage", bResult, "Closed Won selected from Stage dropdown"
 
 bResult = oOppDetail.ClickDone()
-SFQA_ReportStep "Click Done", bResult, "Done button clicked"
+ReportStep "Click Done", bResult, "Done button clicked"
 
 bResult = oOppDetail.IsStageChangedMessageDisplayed()
-SFQA_ReportStep "Verify Stage Changed Message", bResult, "'Stage changed successfully.' toast displayed"
+ReportStep "Verify Stage Changed Message", bResult, "'Stage changed successfully.' toast displayed"
 
 ' --- Step 7: Edit Expected Move-in Date to Today, Save ----------------------
 bResult = oOppDetail.ClickEditMoveInDate()
-SFQA_ReportStep "Click Edit Expected Move-in Date", bResult, "Edit Expected Move-in Date button clicked"
+ReportStep "Click Edit Expected Move-in Date", bResult, "Edit Expected Move-in Date button clicked"
 
 bResult = oOppDetail.SetMoveInDateToToday()
-SFQA_ReportStep "Set Move-in Date to Today", bResult, "Today selected from date picker"
+ReportStep "Set Move-in Date to Today", bResult, "Today selected from date picker"
 
 bResult = oOppDetail.ClickSave()
-SFQA_ReportStep "Click Save", bResult, "Save button clicked"
+ReportStep "Click Save", bResult, "Save button clicked"
 
 ' --- Step 8: Verify Closed Won status on the record card -------------------
 bResult = oOppDetail.IsClosedWonCardDisplayed()
-SFQA_ReportStep "Verify Closed Won Status", bResult, "'Closed Won' displayed in article.slds-card"
+ReportStep "Verify Closed Won Status", bResult, "'Closed Won' displayed in article.slds-card"
 
 ' --- Teardown --------------------------------------------------------------
 Set oLogin = Nothing
