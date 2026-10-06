@@ -288,6 +288,7 @@ Class PO_OpportunityList
             SelectListView = False
             Exit Function
         End If
+        oPage.WebEdit(sLocSearchListsBox).Click   ' ensure focus before Type - confirmed needed 2026-10-06
         oPage.WebEdit(sLocSearchListsBox).Type sListViewName
 
         sLocViewOption = "xpath:=//*[@role='option'][contains(.,'" & sListViewName & "')]"
