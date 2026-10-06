@@ -1,7 +1,6 @@
 ' --- Config ------------------------------------------------------------------
 Const APP_URL               = "https://your-org--qa.sandbox.lightning.force.com/"  ' TODO: set to your actual sandbox/org URL
 Const APP_BROWSER           = "msedge"
-Const APP_BROWSER_ARGS      = "-inprivate"
 Const DEFAULT_SYNC_MS       = 30000
 Const DEFAULT_PAGE_LOAD_MS  = 60000
 Const BROWSER_TITLE_PATTERN = ".*Salesforce.*|.*Lightning.*"
@@ -47,8 +46,7 @@ Sub ReportFatal(sStepName, sDetails)
     ExitAction
 End Sub
 
-' --- Page Object: Login (incl. two-factor Verification Code step) -------------
-' Shared with Action_Opportunity.vbs - steps 1-7 are identical for both test cases.
+' --- Page Object: Login --------------------------------------------------------
 
 Class PO_Login
 
@@ -85,7 +83,7 @@ Class PO_Login
             oPage.WebEdit(sLocPassword).SetSecure sPassword
             EnterPassword = True
         Else
-            ReportStep "PO_Login.EnterPassword", False, "Password field not found within timeout (step 1 may have failed)"
+            ReportStep "PO_Login.EnterPassword", False, "Password field not found within timeout"
             EnterPassword = False
         End If
     End Function
@@ -126,8 +124,7 @@ Class PO_Login
         End If
     End Function
 
-    ' Drives the full three-step flow: username -> Login (reveals password) ->
-    ' password -> Login (reveals verification code) -> code -> Verify.
+    ' Username -> Login -> Password -> Login -> Verification Code -> Verify
     Public Function Login(ByVal sUsername, ByVal sPassword, ByVal sVerificationCode)
         Dim bStep1, bStep2
 
@@ -156,8 +153,7 @@ Class PO_Login
 
 End Class
 
-' --- Page Object: App Navigator (App Launcher + top Navigation Menu) ----------
-' Shared with Action_Opportunity.vbs - steps 8-14 are identical for both test cases.
+' --- Page Object: App Navigator -----------------------------------------------
 
 Class PO_AppNavigator
 
@@ -183,8 +179,6 @@ Class PO_AppNavigator
         End If
     End Function
 
-    ' Types the app name into the App Launcher search box and clicks the
-    ' matching app tile from the filtered results.
     Public Function OpenApp(ByVal sAppName)
         Dim oPage, sLocAppOption
         Set oPage = GetAppPage()
@@ -218,7 +212,6 @@ Class PO_AppNavigator
         End If
     End Function
 
-    ' Clicks a menu item (e.g. "Opportunities") from the open Navigation Menu.
     Public Function ClickNavMenuItem(ByVal sItemName)
         Dim oPage, sLocMenuItem
         Set oPage = GetAppPage()
@@ -232,7 +225,6 @@ Class PO_AppNavigator
         End If
     End Function
 
-    ' Verifies the app shell heading (top-left, e.g. "Sales Centre") is displayed.
     Public Function IsAppDisplayed(ByVal sAppName)
         Dim oPage, sLocHeading
         Set oPage = GetAppPage()
@@ -242,8 +234,7 @@ Class PO_AppNavigator
 
 End Class
 
-' --- Page Object: Opportunity List -----------------------------------------
-' Shared with Action_Opportunity.vbs - steps 15-20 are identical for both test cases.
+' --- Page Object: Opportunity List --------------------------------------------
 
 Class PO_OpportunityList
 
@@ -252,10 +243,7 @@ Class PO_OpportunityList
     Private sLocSearchThisListBox
 
     Private Sub Class_Initialize()
-        ' NOTE: the inner <button title="Select a List View: ..."> only
-        ' highlights/focuses on click - the dropdown's open handler lives on
-        ' the enclosing <lightning-button-icon class="pickerChevron"> custom
-        ' element, so that is the actual click target (confirmed 2026-10-06).
+        ' click target is the lightning-button-icon wrapper, not the inner button
         sLocSelectListViewBtn = "xpath:=//lightning-button-icon[@class='pickerChevron']"
         sLocSearchListsBox    = "xpath:=//input[@placeholder='Search lists...']"
         sLocSearchThisListBox = "xpath:=//input[@placeholder='Search this list...']"
@@ -268,8 +256,6 @@ Class PO_OpportunityList
         IsOpportunitiesPageDisplayed = WaitForObject(oPage.WebElement(sLocHeading), DEFAULT_PAGE_LOAD_MS)
     End Function
 
-    ' Opens the list-view picker, types the view name, and selects the
-    ' matching view from the filtered "Recent List Views" results.
     Public Function SelectListView(ByVal sListViewName)
         Dim oPage, sLocViewOption
         Set oPage = GetAppPage()
@@ -286,7 +272,7 @@ Class PO_OpportunityList
             SelectListView = False
             Exit Function
         End If
-        oPage.WebEdit(sLocSearchListsBox).Click   ' ensure focus before Type - confirmed needed 2026-10-06
+        oPage.WebEdit(sLocSearchListsBox).Click   ' ensure focus before Type
         oPage.WebEdit(sLocSearchListsBox).Type sListViewName
 
         sLocViewOption = "xpath:=//*[@role='option'][contains(.,'" & sListViewName & "')]"
@@ -299,7 +285,6 @@ Class PO_OpportunityList
         SelectListView = True
     End Function
 
-    ' Types into "Search this list..." and presses Enter to filter rows.
     Public Function SearchList(ByVal sSearchText)
         Dim oPage
         Set oPage = GetAppPage()
@@ -313,8 +298,6 @@ Class PO_OpportunityList
         SearchList = True
     End Function
 
-    ' Clicks the first Opportunity record link in the grid (identified by its
-    ' href pattern "/lightning/r/006..." - 006 is the Opportunity id prefix).
     Public Function OpenFirstRecord()
         Dim oPage, sLocFirstRecord
         Set oPage = GetAppPage()
@@ -331,10 +314,6 @@ Class PO_OpportunityList
 End Class
 
 ' --- Page Object: Opportunity Stage Editor ------------------------------------
-' NEW for this test case. Drives the inline "Edit Stage" panel directly
-' (Details list pencil icon), NOT the Path's "Mark Stage as Complete" button
-' used in Action_Opportunity.vbs. CONFIRMED locators captured via Playwright
-' MCP on 2026-10-06.
 
 Class PO_OpportunityStageEditor
 
@@ -362,7 +341,6 @@ Class PO_OpportunityStageEditor
         End If
     End Function
 
-    ' Opens the Stage dropdown and selects the given option (e.g. "Showround").
     Public Function SelectStage(ByVal sStageName)
         Dim oPage, sLocStageOption
         Set oPage = GetAppPage()
@@ -384,8 +362,6 @@ Class PO_OpportunityStageEditor
         SelectStage = True
     End Function
 
-    ' Opens the Sub-Stage dropdown and selects the given option
-    ' (e.g. "Booked and Confirmed").
     Public Function SelectSubStage(ByVal sSubStageName)
         Dim oPage, sLocSubStageOption
         Set oPage = GetAppPage()
@@ -407,11 +383,8 @@ Class PO_OpportunityStageEditor
         SelectSubStage = True
     End Function
 
-    ' Clicks the Date textbox for a shared date/time field (e.g.
-    ' "Site_Visit_Booked_Date_Time__c", "Assessment_Date_Time__c"), opens its
-    ' date picker, and selects "Today". These fields render TWO inputs with
-    ' the same name (Date + Time) - the Date one is the plain <input>, the
-    ' Time one has id="combobox-input-*", so it's excluded explicitly.
+    ' Date input shares its "name" with the Time input - exclude the
+    ' combobox-input id to target the Date field specifically.
     Public Function SetDateFieldToToday(ByVal sFieldName)
         Dim oPage, sLocDateInput, sLocDatePickerToggle, sLocToday
         Set oPage = GetAppPage()
@@ -442,10 +415,7 @@ Class PO_OpportunityStageEditor
         SetDateFieldToToday = True
     End Function
 
-    ' Types into the "Showround feedback" textarea. This Lightning component
-    ' has no stable id/name/aria-label - located relative to its label text
-    ' (confirmed 2026-10-06: the label and textarea are siblings in document
-    ' order, so "following::textarea[1]" reliably reaches it).
+    ' No stable attribute on this field - located relative to its label text.
     Public Function SetShowroundFeedback(ByVal sText)
         Dim oPage, sLocFeedback
         Set oPage = GetAppPage()
@@ -459,8 +429,6 @@ Class PO_OpportunityStageEditor
         End If
     End Function
 
-    ' Clicks a checkbox identified by its "name" attribute
-    ' (e.g. "Assessment_Confirmed_by_Care_Home__c").
     Public Function ClickCheckboxByName(ByVal sFieldName)
         Dim oPage, sLocCheckbox
         Set oPage = GetAppPage()
@@ -489,8 +457,6 @@ Class PO_OpportunityStageEditor
 End Class
 
 ' --- Page Object: Opportunity Related Tab / Field History ---------------------
-' NEW for this test case. CONFIRMED locators captured via Playwright MCP on
-' 2026-10-06.
 
 Class PO_OpportunityRelated
 
@@ -514,13 +480,8 @@ Class PO_OpportunityRelated
         End If
     End Function
 
-    ' Verifies the Opportunity Field History grid's FIRST row records a Stage
-    ' change from sFromValue to sToValue. The table's cells render inside
-    ' nested Lightning web components (shadow DOM), so raw xpath text
-    ' matching on the cell itself doesn't work - instead we read the row's
-    ' flattened "innertext" (which UFT's Web Add-in resolves through its own
-    ' rendering, same as what the browser's accessibility tree exposes) and
-    ' check it contains all three expected substrings.
+    ' Cells render in shadow DOM, so read the row's flattened innertext
+    ' instead of xpath-matching the cell text directly.
     Public Function IsStageChangeRecorded(ByVal sFromValue, ByVal sToValue)
         Dim oPage, sRowText
         Set oPage = GetAppPage()
@@ -545,10 +506,7 @@ Dim oLogin, oNav, oOppList, oStageEditor, oRelated
 Dim sUsername, sPassword, sVerificationCode
 Dim bResult
 
-' TODO: pull from an encrypted parameter / data table / environment variable -
-' never hardcode real credentials in a checked-in script. Verification codes
-' are typically one-time/short-lived - a real run will need a fresh one or a
-' different verification method (e.g. trusted device/IP range) configured.
+' TODO: pull from an encrypted parameter / data table / environment variable
 sUsername         = "qa_user@yourorg.com.sandboxname"
 sPassword         = "<ENCRYPTED_PASSWORD>"
 sVerificationCode = "<VERIFICATION_CODE>"
@@ -556,7 +514,7 @@ sVerificationCode = "<VERIFICATION_CODE>"
 On Error Resume Next
 
 ' --- Step 1: Launch ----------------------------------------------------------
-SystemUtil.Run APP_BROWSER & ".exe", APP_BROWSER_ARGS & " " & APP_URL
+SystemUtil.Run APP_BROWSER & ".exe", APP_URL
 If Err.Number <> 0 Then
     ReportFatal "Launch Browser", "Failed to launch " & APP_BROWSER & ": " & Err.Description
 End If

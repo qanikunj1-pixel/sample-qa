@@ -45,7 +45,7 @@ sPassword = Parameter("Password")
 On Error Resume Next
 
 ' --- Step 1: Launch ----------------------------------------------------------
-SystemUtil.Run APP_BROWSER & ".exe", APP_BROWSER_ARGS & " " & APP_URL
+SystemUtil.Run APP_BROWSER & ".exe", APP_URL
 If Err.Number <> 0 Then
     ReportFatal "Launch Browser", "Failed to launch " & APP_BROWSER & ": " & Err.Description
 End If

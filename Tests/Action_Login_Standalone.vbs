@@ -1,7 +1,6 @@
 ' --- Config ------------------------------------------------------------------
 Const APP_URL               = "https://your-org--qa.sandbox.lightning.force.com"  ' TODO: set to your actual sandbox/org URL
 Const APP_BROWSER           = "msedge"
-Const APP_BROWSER_ARGS      = "-inprivate"
 Const DEFAULT_SYNC_MS       = 30000
 Const DEFAULT_PAGE_LOAD_MS  = 60000
 Const BROWSER_TITLE_PATTERN = ".*Salesforce.*|.*Lightning.*"
@@ -181,7 +180,7 @@ sPassword = "<ENCRYPTED_PASSWORD>"
 On Error Resume Next
 
 ' --- Step 1: Launch ----------------------------------------------------------
-SystemUtil.Run APP_BROWSER & ".exe", APP_BROWSER_ARGS & " " & APP_URL
+SystemUtil.Run APP_BROWSER & ".exe", APP_URL
 If Err.Number <> 0 Then
     ReportFatal "Launch Browser", "Failed to launch " & APP_BROWSER & ": " & Err.Description
 End If
