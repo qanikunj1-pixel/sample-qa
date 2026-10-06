@@ -194,7 +194,7 @@ Class PO_AppNavigator
             OpenApp = False
             Exit Function
         End If
-        oPage.WebEdit(sLocSearchAppsBox).Type sAppName
+        oPage.WebEdit(sLocSearchAppsBox).Set sAppName
 
         sLocAppOption = "xpath:=//*[@role='option'][contains(.,'" & sAppName & "')]"
         If Not WaitForObject(oPage.WebElement(sLocAppOption), DEFAULT_SYNC_MS) Then
@@ -309,7 +309,7 @@ Class PO_OpportunityList
             SearchList = False
             Exit Function
         End If
-        oPage.WebEdit(sLocSearchThisListBox).Type sSearchText
+        oPage.WebEdit(sLocSearchThisListBox).Set sSearchText
         oPage.WebEdit(sLocSearchThisListBox).Type micReturn
         SearchList = True
     End Function
